@@ -13,8 +13,8 @@ namespace webapi_pred.Models
         [Required]
         public string? Teamname { get; set; }
 
-        // public ICollection<Match>? MatchesAsTeam1 { get; set; }
-        // public ICollection<Match>? MatchesAsTeam2 { get; set; }
-        // public ICollection<Match>? MatchesAsWinner { get; set; }
+        public ICollection<Match>? MatchesAsTeam1 { get; set; }
+        public ICollection<Match>? MatchesAsTeam2 { get; set; }
+        public ICollection<Match>? MatchesAsWinner { get; set; }
     }
 }

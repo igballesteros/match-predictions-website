@@ -18,6 +18,6 @@ namespace webapi_pred.Models
         public int? Points { get; set; }
 
         // relations
-        //public ICollection<Prediction>? Predictions { get; set; }
+        public ICollection<Prediction>? Predictions { get; set; }
     }
 }
