@@ -34,7 +34,11 @@ namespace webapi_pred.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Team>> GetTeamById(int id)
         {
-            var team = await _context.Teams.FindAsync(id);
+            var team = await _context.Teams
+                .Include(t => t.MatchesAsTeam1)
+                .Include(t => t.MatchesAsTeam2)
+                .Include(t => t.MatchesAsWinner)
+                .FirstOrDefaultAsync(t => t.TeamId == id);
 
             if (team == null)
             {

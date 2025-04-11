@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace webapi_pred.Models
 {
@@ -13,8 +14,13 @@ namespace webapi_pred.Models
         [Required]
         public string? Teamname { get; set; }
 
+        //[JsonIgnore]
         public ICollection<Match>? MatchesAsTeam1 { get; set; }
+
+        //[JsonIgnore]
         public ICollection<Match>? MatchesAsTeam2 { get; set; }
+
+        //[JsonIgnore]
         public ICollection<Match>? MatchesAsWinner { get; set; }
     }
 }

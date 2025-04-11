@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace webapi_pred.Models
 {
@@ -24,12 +25,15 @@ namespace webapi_pred.Models
 
         // foreign keys
         [ForeignKey("UserId")]
-        public User? User { get; set; }
+        //[JsonIgnore]
+        public User User { get; set; } = null!;
 
         [ForeignKey("MatchId")]
-        public Match? Match { get; set; }
+        //[JsonIgnore]
+        public Match Match { get; set; } = null!;
 
         [ForeignKey("PredictedWinnerId")]
+        //[JsonIgnore]
         public Team? PredictedWinner { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace webapi_pred.Models
 {
@@ -18,6 +19,7 @@ namespace webapi_pred.Models
         public int? Points { get; set; }
 
         // relations
+        //[JsonIgnore]
         public ICollection<Prediction>? Predictions { get; set; }
     }
 }

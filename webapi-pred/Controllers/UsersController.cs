@@ -35,7 +35,9 @@ namespace webapi_pred.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users
+                .Include(u => u.Predictions)
+                .FirstOrDefaultAsync(u => u.UserId == id);
 
             if (user == null)
             {

@@ -19,22 +19,21 @@ namespace webapi_pred.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Match>>> GetMatches()
         {
-            return await _context.Matches.ToListAsync();
+            return await _context.Matches
+                .Include(m => m.Team1)
+                .Include(m => m.Team2)
+                .Include(m => m.WinnerTeam)
+                .Include(m => m.Predictions)
+                .ToListAsync();
         }
 
         [HttpPost]
         public async Task<ActionResult<Match>> CreateMatch(Match newMatch)
         {
-            // hydrating team1, team2 and other properties in navigation
-
-            var team1Exists = await _context.Teams.AnyAsync(t => t.TeamId == newMatch.Team1Id);
-            var team2Exists = await _context.Teams.AnyAsync(t => t.TeamId == newMatch.Team2Id);
-
-            if (!team1Exists || !team2Exists)
+            if (!ModelState.IsValid)
             {
-                return BadRequest("One or both teams do not exist.");
+                return BadRequest(ModelState);  // Returns the model validation errors
             }
-
             _context.Matches.Add(newMatch);
             await _context.SaveChangesAsync();
 
@@ -44,24 +43,17 @@ namespace webapi_pred.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Match>> GetMatchById(int id)
         {
-            var match = await _context.Matches.FindAsync(id);
+            var match = await _context.Matches
+                .Include(m => m.Team1)
+                .Include(m => m.Team2)
+                .Include(m => m.WinnerTeam)
+                .Include(m => m.Predictions)
+                .FirstOrDefaultAsync(m => m.MatchId == id);
 
             if (match == null)
             {
                 return NotFound();
             }
-
-            _context.Entry(match)
-                .Reference(m => m.Team1)
-                .Load();
-
-            _context.Entry(match)
-                .Reference(m => m.Team2)
-                .Load();
-
-            _context.Entry(match)
-                .Reference(m => m.WinnerTeam)
-                .Load();
 
             return match;
         }
