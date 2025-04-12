@@ -14,107 +14,121 @@ namespace webapi_pred.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // setup for users table
+            ConfigureUserEntity(modelBuilder);
+            ConfigureTeamEntity(modelBuilder);
+            ConfigureMatchEntity(modelBuilder);
+            ConfigurePredictionEntity(modelBuilder);
+            ConfigureRelationships(modelBuilder);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+        private void ConfigureUserEntity(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<User>(entity =>
             {
-                // columns
+                // Primary Key
                 entity.HasKey(u => u.UserId);
+
+                // Properties
                 entity.HasIndex(u => u.Username).IsUnique();
-                entity.Property(u => u.Username)
-                      .IsRequired();
-                entity.Property(u => u.Password)
-                      .IsRequired();
+                entity.Property(u => u.Username).IsRequired();
+                entity.Property(u => u.Password).IsRequired();
                 entity.Property(u => u.Points)
-                      .IsRequired(false)
-                      .HasDefaultValue(0);
+                    .IsRequired()
+                    .HasDefaultValue(0);
 
-                // relationships
+                // Relationships
                 entity.HasMany(u => u.Predictions)
-                      .WithOne(p => p.User)
-                      .HasForeignKey(p => p.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                    .WithOne(p => p.User)
+                    .HasForeignKey(p => p.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
+        }
 
-            // setup for teams table
+        private void ConfigureTeamEntity(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Team>(entity =>
             {
+                // Primary Key
                 entity.HasKey(t => t.TeamId);
+
+                // Properties
                 entity.HasIndex(t => t.Teamname).IsUnique();
             });
+        }
 
-            // setup for matches table
+        private void ConfigureMatchEntity(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Match>(entity =>
             {
-                // columns
+                // Primary Key
                 entity.HasKey(m => m.MatchId);
-                entity.HasOne(m => m.Team1)
-                    .WithMany()
-                    .HasForeignKey(m => m.Team1Id)
-                    .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(m => m.Team2)
-                    .WithMany()
-                    .HasForeignKey(m => m.Team2Id)
-                    .OnDelete(DeleteBehavior.Restrict);
+                // Properties
+                entity.Property(m => m.Team1Score).IsRequired();
+                entity.Property(m => m.Team2Score).IsRequired();
+                entity.Property(m => m.MatchDate).IsRequired();
 
-                entity.HasOne(m => m.WinnerTeam)
-                    .WithMany()
-                    .HasForeignKey(m => m.WinnerTeamId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.Property(m => m.Team1Score)
-                    .IsRequired();
-                entity.Property(m => m.Team2Score)
-                    .IsRequired();
-                entity.Property(m => m.MatchDate)
-                    .IsRequired();
+                // Indexes
+                entity.HasIndex(m => m.MatchDate);
+                entity.HasIndex(m => m.WinnerTeamId);
             });
+        }
 
-            // setup for predictions table
+        private void ConfigurePredictionEntity(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Prediction>(entity =>
             {
+                // Primary Key
                 entity.HasKey(p => p.PredictionId);
+
+                // Properties
                 entity.Property(p => p.MatchId).IsRequired();
                 entity.Property(p => p.PredictedWinnerId).IsRequired();
                 entity.Property(p => p.PredictedTeam1Score).IsRequired();
                 entity.Property(p => p.PredictedTeam2Score).IsRequired();
-
-                entity.HasOne(p => p.User)
-                      .WithMany(u => u.Predictions)
-                      .HasForeignKey(p => p.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(p => p.Match)
-                      .WithMany(m => m.Predictions)
-                      .HasForeignKey(p => p.MatchId)
-                      .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(p => p.PredictedWinner)
-                      .WithMany()
-                      .HasForeignKey(p => p.PredictedWinnerId)
-                      .OnDelete(DeleteBehavior.Restrict);
             });
+        }
 
-            // setup for teams table relations
-            modelBuilder.Entity<Team>()
-                .HasMany<Match>(t => t.MatchesAsTeam1)
-                .WithOne(m => m.Team1)
+        private void ConfigureRelationships(ModelBuilder modelBuilder)
+        {
+            // Match Relationships
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.Team1)
+                .WithMany(t => t.MatchesAsTeam1)
                 .HasForeignKey(m => m.Team1Id)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Team>()
-                .HasMany<Match>(t => t.MatchesAsTeam2)
-                .WithOne(m => m.Team2)
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.Team2)
+                .WithMany(t => t.MatchesAsTeam2)
                 .HasForeignKey(m => m.Team2Id)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Team>()
-                .HasMany<Match>(t => t.MatchesAsWinner)
-                .WithOne(m => m.WinnerTeam)
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.WinnerTeam)
+                .WithMany(t => t.MatchesAsWinner)
                 .HasForeignKey(m => m.WinnerTeamId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Match>()
+                .HasMany(m => m.Predictions)
+                .WithOne(p => p.Match)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Prediction Relationships
+            modelBuilder.Entity<Prediction>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Predictions)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Prediction>()
+                .HasOne(p => p.PredictedWinner)
+                .WithMany()
+                .HasForeignKey(p => p.PredictedWinnerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

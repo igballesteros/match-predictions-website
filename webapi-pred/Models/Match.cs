@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace webapi_pred.Models
 {
@@ -11,29 +12,26 @@ namespace webapi_pred.Models
         [Key]
         public int MatchId { get; set; }
 
-        // columns
         public int Team1Id { get; set; }
         public int Team2Id { get; set; }
-        public int Team1Score { get; set; }
-        public int Team2Score { get; set; }
-        public int? WinnerTeamId { get; set; }
-        public DateTime MatchDate { get; set; }
 
-        // foreign keys
         [ForeignKey("Team1Id")]
-        //[JsonIgnore]
-        public Team? Team1 { get; set; }
+        public required Team Team1 { get; set; }
 
         [ForeignKey("Team2Id")]
-        //[JsonIgnore]
-        public Team? Team2 { get; set; }
+        public required Team Team2 { get; set; }
+
+        public int Team1Score { get; set; } = 0;
+        public int Team2Score { get; set; } = 0;
+
+        public int? WinnerTeamId { get; set; }
 
         [ForeignKey("WinnerTeamId")]
-        //[JsonIgnore]
         public Team? WinnerTeam { get; set; }
 
-        // relations
-        //[JsonIgnore]
-        public ICollection<Prediction>? Predictions { get; set; }
+        public DateTime MatchDate { get; set; }
+        public bool IsCompleted => WinnerTeamId.HasValue;
+
+        public ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();
     }
 }

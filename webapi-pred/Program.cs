@@ -39,8 +39,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
-
-// deal with object cycle and object depth maximum
+app.UseStaticFiles();
 
 
 app.Run();

@@ -12,15 +12,17 @@ namespace webapi_pred.Models
 
         // columns
         [Required]
-        public string? Teamname { get; set; }
+        public required string Teamname { get; set; }
+
+        public string? LogoPath { get; set; }
 
         //[JsonIgnore]
-        public ICollection<Match>? MatchesAsTeam1 { get; set; }
+        public ICollection<Match> MatchesAsTeam1 { get; set; } = new List<Match>();
 
         //[JsonIgnore]
-        public ICollection<Match>? MatchesAsTeam2 { get; set; }
+        public ICollection<Match> MatchesAsTeam2 { get; set; } = new List<Match>();
 
         //[JsonIgnore]
-        public ICollection<Match>? MatchesAsWinner { get; set; }
+        public ICollection<Match> MatchesAsWinner { get; set; } = new List<Match>();
     }
 }

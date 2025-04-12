@@ -11,15 +11,15 @@ namespace webapi_pred.Models
         public int UserId { get; set; }
         // columns
         [Required]
-        public string? Username { get; set; }
+        public required string Username { get; set; }
 
         [Required]
-        public string? Password { get; set; }
+        public required string Password { get; set; }
 
-        public int? Points { get; set; }
+        public int Points { get; set; } = 0;
 
         // relations
-        //[JsonIgnore]
+        // [JsonIgnore]
         public ICollection<Prediction>? Predictions { get; set; }
     }
 }

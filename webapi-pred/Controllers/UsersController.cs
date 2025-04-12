@@ -1,3 +1,4 @@
+using webapi_pred.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi_pred.Data;
@@ -18,61 +19,62 @@ namespace webapi_pred.Controllers
 
         // GET: api/users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _context.Users.ToListAsync();
+
+            // Map User to UserDto
+            var userDtos = users.Select(u => new UserDto
+            {
+                UserId = u.UserId,
+                Username = u.Username,
+                Points = u.Points
+            });
+
+            return Ok(userDtos);
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> CreateUser(User newUser)
+        public async Task<ActionResult<UserDto>> CreateUser(User newUser)
         {
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetUsers), new { id = newUser.UserId }, newUser);
+            // return a DTO
+            return CreatedAtAction(nameof(GetUserById), new { id = newUser.UserId },
+                new UserDto
+                {
+                    UserId = newUser.UserId,
+                    Username = newUser.Username,
+                    Points = newUser.Points
+                });
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUserById(int id)
+        public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
-            var user = await _context.Users
-                .Include(u => u.Predictions)
-                .FirstOrDefaultAsync(u => u.UserId == id);
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
 
-            if (user == null)
+            return new UserDto
             {
-                return NotFound();
-            }
-
-            return user;
+                UserId = user.UserId,
+                Username = user.Username,
+                Points = user.Points
+            };
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User updatedUser)
+        public async Task<IActionResult> PutUser(int id, UserDto userDto)
         {
-            if (id != updatedUser.UserId)
-            {
-                return BadRequest("User ID mismatch.");
-            }
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
 
-            _context.Entry(updatedUser).State = EntityState.Modified;
+            // Update only allowed fields from DTO
+            user.Username = userDto.Username;
+            user.Points = userDto.Points;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch
-            {
-                if (!_context.Users.Any(u => u.UserId == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
