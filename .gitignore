@@ -1,0 +1,26 @@
+# .NET Core
+bin/
+obj/
+
+# User-specific files
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Logs
+*.log
+
+# NPM
+node_modules/
+
+# ASP.NET Core
+wwwroot/lib/
+
+# Publish folder
+publish/
+
+# Environment-specific settings
+appsettings.Development.json
