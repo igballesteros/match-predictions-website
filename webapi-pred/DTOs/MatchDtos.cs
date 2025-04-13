@@ -37,7 +37,8 @@ namespace webapi_pred.DTOs
 
         // Helper properties for UI
         public bool CanPredict => !IsCompleted && MatchDate > DateTime.UtcNow;
-        public string Status => IsCompleted ? "Completed"
-            : MatchDate > DateTime.UtcNow ? "Upcoming" : "Live";
+        public string Status =>
+            IsCompleted ? "Completed" :
+            MatchDate > DateTime.UtcNow ? "Upcoming" : "Live";
     }
 }
