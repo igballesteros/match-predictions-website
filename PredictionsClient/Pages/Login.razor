@@ -1,50 +1,110 @@
-@page "/login"
-@inject MockAuthService Auth
-@inject NavigationManager Nav
-@implements IDisposable
+@page "/login" // This makes the component a routable page
+@using PredictionsClient.Services
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.AspNetCore.Components.Web
+
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+
+<PageTitle>Login</PageTitle>
 
 <div class="login-container">
-    <h3>Select Your Role</h3>
+    <h1>CDL Predictions Login</h1>
+    <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <div class="login-buttons">
-        <!-- admin button -->
+        <div class="form-group">
+            <label for="username">Username</label>
+            <InputText id="username" @bind-Value="loginModel.Username" class="form-control" />
+            <ValidationMessage For="@(() => loginModel.Username)" />
+        </div>
 
-        <button @onclick="() => LoginAsAdmin()" class="btn btn-admin">
-            <i class="fas fa-user-shield"></i> Enter as Admin
+        <div class="form-group">
+            <label for="password">Password</label>
+            <InputText id="password" @bind-Value="loginModel.Password" class="form-control" />
+            <ValidationMessage For="@(() => loginModel.Password)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" disabled="@isLoading">
+            @if (isLoading)
+            {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+            }
+            Login
         </button>
 
-        <!-- user button -->
-        <button @onclick="() => LoginAsUser()" class="btn btn-user">
-            <i class="fas fa-user"></i> Enter as User
-        </button>
-    </div>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-3">@errorMessage</div>
+        }
+
+    </EditForm>
 </div>
 
-
 @code {
-    protected override void OnInitialized()
+    // component state
+    private Services.LoginModel loginModel = new();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    // model for the form data
+    private class LoginModel
     {
-        if (Auth.CurrentUser != null)
-            Nav.NavigateTo("/");
-
-
-        Auth.OnAuthStateChanged += StateHasChanged;
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 
-    private void LoginAsAdmin()
+    // form submission handler
+    private async Task HandleLogin()
     {
-        Auth.LoginAsAdmin();
-        Nav.NavigateTo("/counter");
+        isLoading = true;
+        errorMessage = string.Empty;
+        Console.WriteLine("HandleLogin started"); // Add this
+
+        try
+        {
+            Console.WriteLine("Calling AuthService.Login");
+            var result = await AuthService.Login(loginModel);
+            Console.WriteLine($"AuthService returned: {result.Success}");
+
+            if (result.Success)
+            {
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+                var queryParams = QueryHelpers.ParseQuery(uri.Query);
+
+                // Safely handle the returnUrl with null check
+                var returnUrl = queryParams.TryGetValue("returnUrl", out var param)
+                ? param.FirstOrDefault()
+                : "/";
+
+                // Ensure we never pass null to NavigateTo
+                NavigationManager.NavigateTo(returnUrl ?? "/");
+            }
+            else
+            {
+                errorMessage = result.Error ?? "Login failed. Please try again.";
+                Console.WriteLine($"Login failed: {errorMessage}"); // Add this
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred during login.";
+            Console.Error.WriteLine(ex.ToString());
+            Console.WriteLine($"Exception: {ex}");
+        }
+        finally
+        {
+            isLoading = false;
+            Console.WriteLine("HandleLogin completed");
+        }
     }
 
-    private void LoginAsUser()
-    {
-        Auth.LoginAsUser();
-        Nav.NavigateTo("/");
-    }
-    public void Dispose()
-    {
-        // Clean up event subscription
-        Auth.OnAuthStateChanged -= StateHasChanged;
-    }
 }

@@ -1,56 +1,81 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
+using Blazored.LocalStorage;
+using System.IdentityModel.Tokens.Jwt;
 
-public class CustomAuthStateProvider : AuthenticationStateProvider
+namespace PredictionsClient.Services
 {
-    private readonly ILocalStorageService _localStorage;
-
-    public CustomAuthStateProvider(ILocalStorageService localStorage)
+    public class CustomAuthStateProvider : AuthenticationStateProvider
     {
-        _localStorage = localStorage;
-    }
+        private readonly ILocalStorageService _localStorage; // blazor locar storage - stores jwt in browser storage
 
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
-    {
-        var token = await _localStorage.GetItemAsync<string>("authToken");
-
-        if (string.IsNullOrEmpty(token))
+        public CustomAuthStateProvider(ILocalStorageService localStorage)
         {
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            _localStorage = localStorage;
         }
 
-        var claims = ParseClaimsFromJwt(token);
-        var identity = new ClaimsIdentity(claims, "jwt");
-        var user = new ClaimsPrincipal(identity);
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            // checks for stored token from local storage set
+            var token = await _localStorage.GetItemAsync<string>("authToken");
 
-        return new AuthenticationState(user);
-    }
+            // if null, return unauthenticated state
+            if (string.IsNullOrEmpty(token))
+            {
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
 
-    public async Task NotifyUserAuthentication(string token)
-    {
-        await _localStorage.SetItemAsync("authToken", token);
-        var claims = ParseClaimsFromJwt(token);
-        var identity = new ClaimsIdentity(claims, "jwt");
-        var user = new ClaimsPrincipal(identity);
+            // parse claims from jwt
+            var claims = ParseClaimsFromJwt(token);
 
-        NotifyAuthenticationStateChanged(
-            Task.FromResult(new AuthenticationState(user)));
-    }
+            // create auth user
+            var identity = new ClaimsIdentity(claims, "jwt");
+            var user = new ClaimsPrincipal(identity);
 
-    public async Task NotifyUserLogout()
-    {
-        await _localStorage.RemoveItemAsync("authToken");
-        var identity = new ClaimsIdentity();
-        var user = new ClaimsPrincipal(identity);
+            return new AuthenticationState(user);
+        }
 
-        NotifyAuthenticationStateChanged(
-            Task.FromResult(new AuthenticationState(user)));
-    }
+        public async Task NotifyUserAuthentication(string token)
+        {
+            // store token
+            await _localStorage.SetItemAsync("authToken", token);
 
-    private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
-    {
-        var handler = new JwtSecurityTokenHandler();
-        var token = handler.ReadJwtToken(jwt);
-        return token.Claims;
+            // parse claim
+            var claims = ParseClaimsFromJwt(token);
+            var identity = new ClaimsIdentity(claims, "jwt");
+            var user = new ClaimsPrincipal(identity);
+
+            // notify all components
+            NotifyAuthenticationStateChanged(
+                Task.FromResult(new AuthenticationState(user)));
+        }
+
+        public async Task NotifyUserLogout()
+        {
+            // remove token
+            await _localStorage.RemoveItemAsync("authToken");
+
+            // create empty identity
+            var identity = new ClaimsIdentity();
+            var user = new ClaimsPrincipal(identity);
+
+            // notify all components
+            NotifyAuthenticationStateChanged(
+                Task.FromResult(new AuthenticationState(user)));
+        }
+
+        private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwt);
+            return token.Claims;
+        }
     }
 }
+
+/*
+  Persists auth state - via local storage
+  Parses JWT tokens to extract user claims
+  Notifies components when auth state changes
+  Provides current auth status to the entire app
+*/

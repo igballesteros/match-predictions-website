@@ -1,54 +1,95 @@
 using System.Net.Http.Json;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
+using Blazored.LocalStorage;
 
-public class AuthService
+namespace PredictionsClient.Services
 {
-    private readonly HttpClient _httpClient;
-    private readonly AuthenticationStateProvider _authStateProvider;
 
-    public AuthService(HttpClient httpClient, AuthenticationStateProvider authStateProvider)
+    public class AuthService
     {
-        _httpClient = httpClient;
-        _authStateProvider = authStateProvider;
-    }
+        private readonly HttpClient _httpClient;
+        private readonly AuthenticationStateProvider _authStateProvider;
 
-    public async Task<LoginResult> Login(LoginModel loginModel)
-    {
-        var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginModel);
-
-        if (!response.IsSuccessStatusCode)
+        // constructor with dep injections
+        public AuthService(HttpClient httpClient, AuthenticationStateProvider authStateProvider)
         {
-            return new LoginResult { Succes = false, Error = "Invalid Credentials" };
+            _httpClient = httpClient; // calls to backend
+            _authStateProvider = authStateProvider; // notifies app auth change
         }
 
-        var loginResult = await response.Content.ReadFromJsonAsync<LoginResult>();
-
-        if (loginResult?.Success == true)
+        public async Task<LoginResult> Login(LoginModel loginModel)
         {
-            await ((CustomAuthStateProvider)_authStateProvider).NotifyUserAuthentication(loginResult.Token!);
+            Console.WriteLine($"Attempting login with: {loginModel.Username}/{loginModel.Password}");
+            try
+            {
+                // api call to validate credentials
+                var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginModel);
+                Console.WriteLine($"Status: {response.StatusCode}");
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Response: {responseContent}");
+                // process response - handle failed login
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new LoginResult { Success = false, Error = await response.Content.ReadAsStringAsync() };
+                }
+
+                // On success, extract token
+                var loginResult = await response.Content.ReadFromJsonAsync<LoginResult>();
+
+                // notify state about successful provider
+                if (loginResult != null && !string.IsNullOrEmpty(loginResult.Token))
+                {
+                    loginResult.Success = true;
+                    await ((CustomAuthStateProvider)_authStateProvider).NotifyUserAuthentication(loginResult.Token);
+                }
+                else
+                {
+                    loginResult.Success = false;
+                    loginResult.Error = "Invalid response from server";
+                }
+
+                return loginResult;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex}");
+                return new LoginResult
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
         }
 
-        return loginResult!;
+        // logout method
+        public async Task Logout()
+        {
+            await ((CustomAuthStateProvider)_authStateProvider).NotifyUserLogout();
+        }
     }
 
-    public async Task Logout()
+    public class LoginModel
     {
-        await ((CustomAuthStateProvider)_authStateProvider).NotifyUserLogout();
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class LoginResult
+    {
+        public bool Success { get; set; }
+        public string? Token { get; set; } // JWT token from api
+        public string? Error { get; set; } // error message
+        public string? Role { get; set; } // user role from api
+        public string? Username { get; set; } // username from api
     }
 }
-
-public class LoginModel
-{
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-}
-
-public class LoginResult
-{
-    public bool Success { get; set; }
-    public string? Token { get; set; }
-    public string? Error { get; set; }
-    public string? Role { get; set; }
-    public string? Username { get; set; }
-}
+/*
+  handles authentication operations (login/logout) and communicates with your backend api
+  - performs credential validation - calls api login endpoint
+  - manages the login/logout process - initiates these action
+  - handles api communication - sends credentials recieves tokens
+  - transforms apo responses - application friendly formats
+*/

@@ -34,10 +34,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazorClient",
         builder => builder
-            .WithOrigins("http://localhost:5114") // Must match Blazor's EXACT URL
+            .WithOrigins("http://localhost:5114") // Must match your Blazor URL
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials()); // Add this if using cookies/auth
+            .AllowCredentials());
 });
 
 
