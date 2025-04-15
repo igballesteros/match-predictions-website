@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi_pred.Data;
-using webapi_pred.DTOs;
+using SharedDtos;
 using webapi_pred.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace webapi_pred.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
 
     public class PredictionsController : ControllerBase
@@ -259,14 +262,15 @@ namespace webapi_pred.Controllers
 
         private int GetCurrentUserId()
         {
-            if (Request.Headers.TryGetValue("X-Test-User_id", out var userIdHeader))
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
             {
-                if (int.TryParse(userIdHeader, out var userId))
-                {
-                    return userId;
-                }
+                _logger.LogWarning($"Invalid user claim attempt: {userIdClaim}");
+                throw new UnauthorizedAccessException("Invalid user identifier in token");
             }
-            return 1;
+
+            return userId;
         }
     }
 }

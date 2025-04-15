@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using webapi_pred.Data;
 
@@ -11,9 +12,11 @@ using webapi_pred.Data;
 namespace webapi_pred.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250414231245_AddUserRole")]
+    partial class AddUserRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -149,24 +152,6 @@ namespace webapi_pred.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = 1,
-                            Password = "1a2b3c4d5e",
-                            Points = 0,
-                            Role = "Admin",
-                            Username = "admin"
-                        },
-                        new
-                        {
-                            UserId = 2,
-                            Password = "userpassword",
-                            Points = 0,
-                            Role = "User",
-                            Username = "regularuser"
-                        });
                 });
 
             modelBuilder.Entity("webapi_pred.Models.Match", b =>

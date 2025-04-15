@@ -1,8 +1,9 @@
-using webapi_pred.DTOs;
+using SharedDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi_pred.Data;
 using webapi_pred.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi_pred.Controllers
 {
@@ -40,6 +41,7 @@ namespace webapi_pred.Controllers
         }
 
         // creates a new row in the table
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<TeamDto>> CreateTeam(Team newTeam)
         {
@@ -79,6 +81,7 @@ namespace webapi_pred.Controllers
         }
 
         // modifies an existing row
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTeam(int id, TeamDto teamDto)
         {   // looks for id match in the server
@@ -93,6 +96,7 @@ namespace webapi_pred.Controllers
         }
 
         // posts a logo
+        [Authorize(Roles = "Admin")]
         [HttpPost("{id}/upload-logo")]
         public async Task<IActionResult> UploadLogo(int id, IFormFile file)
         {
@@ -140,6 +144,7 @@ namespace webapi_pred.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTeam(int id)
         {

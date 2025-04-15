@@ -20,6 +20,23 @@ namespace webapi_pred.Data
             ConfigurePredictionEntity(modelBuilder);
             ConfigureRelationships(modelBuilder);
 
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    UserId = 1,
+                    Username = "admin",
+                    Password = "1a2b3c4d5e",
+                    Role = "Admin"
+                },
+                new User
+                {
+                    UserId = 2,
+                    Username = "regularuser",
+                    Password = "userpassword",
+                    Role = "User" // Add this role
+                }
+            );
+
             base.OnModelCreating(modelBuilder);
         }
 

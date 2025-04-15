@@ -1,0 +1,50 @@
+@page "/login"
+@inject MockAuthService Auth
+@inject NavigationManager Nav
+@implements IDisposable
+
+<div class="login-container">
+    <h3>Select Your Role</h3>
+
+    <div class="login-buttons">
+        <!-- admin button -->
+
+        <button @onclick="() => LoginAsAdmin()" class="btn btn-admin">
+            <i class="fas fa-user-shield"></i> Enter as Admin
+        </button>
+
+        <!-- user button -->
+        <button @onclick="() => LoginAsUser()" class="btn btn-user">
+            <i class="fas fa-user"></i> Enter as User
+        </button>
+    </div>
+</div>
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (Auth.CurrentUser != null)
+            Nav.NavigateTo("/");
+
+
+        Auth.OnAuthStateChanged += StateHasChanged;
+    }
+
+    private void LoginAsAdmin()
+    {
+        Auth.LoginAsAdmin();
+        Nav.NavigateTo("/counter");
+    }
+
+    private void LoginAsUser()
+    {
+        Auth.LoginAsUser();
+        Nav.NavigateTo("/");
+    }
+    public void Dispose()
+    {
+        // Clean up event subscription
+        Auth.OnAuthStateChanged -= StateHasChanged;
+    }
+}

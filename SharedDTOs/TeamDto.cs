@@ -1,4 +1,4 @@
-namespace webapi_pred.DTOs
+namespace SharedDtos
 {
     public class TeamDto
     {

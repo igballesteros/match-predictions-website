@@ -18,6 +18,8 @@ namespace webapi_pred.Models
 
         public int Points { get; set; } = 0;
 
+        public string Role { get; set; } = "User";
+
         // relations
         // [JsonIgnore]
         public ICollection<Prediction>? Predictions { get; set; }

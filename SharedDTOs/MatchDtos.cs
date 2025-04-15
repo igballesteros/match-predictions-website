@@ -1,4 +1,4 @@
-namespace webapi_pred.DTOs
+namespace SharedDtos
 {
     // For creating new matches (minimum required data)
     public class CreateMatchDto

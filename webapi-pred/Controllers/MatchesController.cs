@@ -3,12 +3,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi_pred.Data;
-using webapi_pred.DTOs;
+using SharedDtos;
 using webapi_pred.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi_pred.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class MatchesController : ControllerBase
     {
@@ -82,6 +84,7 @@ namespace webapi_pred.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<MatchDto>> CreateMatch(CreateMatchDto createMatchDto)
         {
@@ -133,6 +136,7 @@ namespace webapi_pred.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}/result")]
         public async Task<IActionResult> UpdateMatchResult(int id, UpdateMatchDto updateDto)
         {
@@ -175,6 +179,7 @@ namespace webapi_pred.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMatch(int id)
         {

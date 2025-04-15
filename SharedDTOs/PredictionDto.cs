@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace webapi_pred.DTOs
+namespace SharedDtos
 {
     public class PredictionDto
     {
