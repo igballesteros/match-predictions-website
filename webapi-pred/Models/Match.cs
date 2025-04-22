@@ -16,10 +16,10 @@ namespace webapi_pred.Models
         public int Team2Id { get; set; }
 
         [ForeignKey("Team1Id")]
-        public required Team Team1 { get; set; }
+        public Team? Team1 { get; set; }
 
         [ForeignKey("Team2Id")]
-        public required Team Team2 { get; set; }
+        public Team? Team2 { get; set; }
 
         public int Team1Score { get; set; } = 0;
         public int Team2Score { get; set; } = 0;

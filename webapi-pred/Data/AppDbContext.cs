@@ -37,6 +37,72 @@ namespace webapi_pred.Data
                 }
             );
 
+            modelBuilder.Entity<Team>().HasData(
+                new Team
+                {
+                    TeamId = 1,
+                    Teamname = "Atlanta Faze"
+                },
+                new Team
+                {
+                    TeamId = 2,
+                    Teamname = "Boston Breach"
+                },
+                new Team
+                {
+                    TeamId = 3,
+                    Teamname = "Carolina Ravens"
+                },
+                new Team
+                {
+                    TeamId = 4,
+                    Teamname = "Cloud9 New York"
+                },
+                new Team
+                {
+                    TeamId = 5,
+                    Teamname = "Los Angeles Guerrilas M8"
+                },
+                new Team
+                {
+                    TeamId = 6,
+                    Teamname = "Los Angeles Thieves"
+                },
+                new Team
+                {
+                    TeamId = 7,
+                    Teamname = "Miami Heretics"
+                },
+                new Team
+                {
+                    TeamId = 8,
+                    Teamname = "Minnesota Røkkr"
+                },
+                new Team
+                {
+                    TeamId = 9,
+                    Teamname = "Optic Texas"
+                },
+                new Team
+                {
+                    TeamId = 10,
+                    Teamname = "Toronto Ultra"
+                },
+                new Team
+                {
+                    TeamId = 11,
+                    Teamname = "Vancouver Surge"
+                },
+                new Team
+                {
+                    TeamId = 12,
+                    Teamname = "Vegas Falcons"
+                }
+
+            );
+
+            modelBuilder.Entity<Match>().HasData(MatchSeeder.GetMatchSeeds());
+
             base.OnModelCreating(modelBuilder);
         }
 

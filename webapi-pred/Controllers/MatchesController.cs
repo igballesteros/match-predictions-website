@@ -258,6 +258,11 @@ namespace webapi_pred.Controllers
 
         private static MatchDto MapToDto(Match m, HttpRequest request)
         {
+            if (m.Team1 == null || m.Team2 == null)
+            {
+                throw new ArgumentException("Match must have both Team1 and Team2 loaded");
+            }
+
             return new MatchDto
             {
                 MatchId = m.MatchId,
