@@ -30,7 +30,8 @@ namespace webapi_pred.Controllers
             {
                 UserId = u.UserId,
                 Username = u.Username,
-                Points = u.Points
+                Points = u.Points,
+                Role = u.Role
             });
 
             return Ok(userDtos);
@@ -48,7 +49,8 @@ namespace webapi_pred.Controllers
                 {
                     UserId = newUser.UserId,
                     Username = newUser.Username,
-                    Points = newUser.Points
+                    Points = newUser.Points,
+                    Role = newUser.Role
                 });
         }
 
@@ -62,7 +64,8 @@ namespace webapi_pred.Controllers
             {
                 UserId = user.UserId,
                 Username = user.Username,
-                Points = user.Points
+                Points = user.Points,
+                Role = user.Role
             };
         }
 
@@ -75,6 +78,7 @@ namespace webapi_pred.Controllers
             // Update only allowed fields from DTO
             user.Username = userDto.Username;
             user.Points = userDto.Points;
+            user.Role = userDto.Role;
 
             await _context.SaveChangesAsync();
             return NoContent();

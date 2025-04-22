@@ -120,6 +120,9 @@ namespace webapi_pred.Data
                 entity.Property(u => u.Points)
                     .IsRequired()
                     .HasDefaultValue(0);
+                entity.Property(u => u.Role)
+                    .IsRequired()
+                    .HasDefaultValue("User");
 
                 // Relationships
                 entity.HasMany(u => u.Predictions)
