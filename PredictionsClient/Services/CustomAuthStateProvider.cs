@@ -70,6 +70,16 @@ namespace PredictionsClient.Services
             var token = handler.ReadJwtToken(jwt);
             return token.Claims;
         }
+        public async Task<bool> IsInRoleAsync(string role)
+        {
+            var token = await _localStorage.GetItemAsync<string>("authToken");
+            if (string.IsNullOrEmpty(token)) return false;
+
+            var claims = ParseClaimsFromJwt(token);
+            return claims.Any(c =>
+                (c.Type == ClaimTypes.Role || c.Type == "role") &&
+                c.Value == role);
+        }
     }
 }
 

@@ -1,0 +1,30 @@
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager NavigationManager
+
+<div class="guest-container">
+    <h1>Welcome to CDL Predictions</h1>
+    <p>Predict match winners and compete with friends!</p>
+
+    <div class="cta-buttons">
+        <button class="btn btn-primary" @onclick="NavigateToLogin">Login</button>
+        <button class="btn btn-secondary">Sign Up</button>
+    </div>
+
+    <div class="upcoming-matches">
+        <h3>Upcoming Matches</h3>
+        <!-- Display some upcoming matches to entice guests -->
+    </div>
+    <div class="team-leaderboards">
+        <h3>Team Leaderboards</h3>
+    </div>
+    <div class="user-leaderboards">
+        <h3>User Leaderboards</h3>
+    </div>
+</div>
+
+@code {
+    private void NavigateToLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+}

@@ -42,11 +42,13 @@ namespace PredictionsClient.Services
                 // notify state about successful provider
                 if (loginResult != null && !string.IsNullOrEmpty(loginResult.Token))
                 {
-                    loginResult.Success = true;
                     await ((CustomAuthStateProvider)_authStateProvider).NotifyUserAuthentication(loginResult.Token);
+                    loginResult.Success = true;
+
                 }
                 else
                 {
+                    loginResult ??= new LoginResult();
                     loginResult.Success = false;
                     loginResult.Error = "Invalid response from server";
                 }

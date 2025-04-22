@@ -1,0 +1,24 @@
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager NavigationManager
+
+<div class="admin-dashboard">
+    <h1>Admin Dashboard</h1>
+
+    <div class="admin-actions">
+        <button class="btn btn-danger" @onclick="NavigateToMatchManagement">Manage Matches</button>
+        <button class="btn btn-warning">Manage Users</button>
+        <button class="btn btn-info">View All Predictions</button>
+    </div>
+
+    <div class="stats-overview">
+        <h3>System Statistics</h3>
+        <!-- Admin stats would go here -->
+    </div>
+</div>
+
+@code {
+    private void NavigateToMatchManagement()
+    {
+        NavigationManager.NavigateTo("/admin/matches");
+    }
+}

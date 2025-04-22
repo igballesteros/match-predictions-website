@@ -26,9 +26,14 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 
 // register auth service
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<MatchService>();
 
 // add authorization capabilites 
-builder.Services.AddAuthorizationCore();
+builder.Services.AddAuthorizationCore(config =>
+{
+  config.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+  config.AddPolicy("User", policy => policy.RequireRole("User"));
+});
 
 // primary httpclient
 builder.Services.AddScoped(sp =>

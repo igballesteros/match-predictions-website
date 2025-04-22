@@ -24,6 +24,54 @@ namespace webapi_pred.Controllers
         }
 
         [HttpGet]
+        public async Task<ActionResult<PaginatedResponse<MatchDto>>> GetMatchesPaginated(
+            [FromQuery] PaginationParams paginationParams,
+            [FromQuery] bool? upcomingOnly = null,
+            [FromQuery] bool? completedOnly = null)
+        {
+            try
+            {
+                var query = _context.Matches
+                    .Include(m => m.Team1)
+                    .Include(m => m.Team2)
+                    .Include(m => m.WinnerTeam)
+                    .AsQueryable();
+
+                if (upcomingOnly == true)
+                {
+                    query = query.Where(m => m.MatchDate > DateTime.UtcNow);
+                }
+                else if (completedOnly == true)
+                {
+                    query = query.Where(m => m.WinnerTeamId != null);
+                }
+
+                var totalCount = await query.CountAsync();
+                var matches = await query
+                    .OrderBy(m => m.MatchDate)
+                    .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                    .Take(paginationParams.PageSize)
+                    .ToListAsync();
+
+                var result = new PaginatedResponse<MatchDto>
+                {
+                    PageNumber = paginationParams.PageNumber,
+                    PageSize = paginationParams.PageSize,
+                    TotalCount = totalCount,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)paginationParams.PageSize),
+                    Data = matches.Select(m => MapToDto(m, Request)).ToList()
+                };
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting paginated matches");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpGet("all")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<MatchDto>>> GetMatches(
             [FromQuery] bool? upcomingOnly = null,
             [FromQuery] bool? completedOnly = null)
@@ -244,6 +292,27 @@ namespace webapi_pred.Controllers
                 MatchDate = m.MatchDate,
                 IsCompleted = m.WinnerTeamId != null,
             };
+        }
+    }
+    public class PaginatedResponse<T>
+    {
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages { get; set; }
+        public int TotalCount { get; set; }
+        public List<T> Data { get; set; } = new List<T>();
+    }
+
+    public class PaginationParams
+    {
+        private const int MaxPageSize = 25;
+        private int _pageSize = 5;
+
+        public int PageNumber { get; set; } = 1;
+        public int PageSize
+        {
+            get => _pageSize;
+            set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
         }
     }
 }
