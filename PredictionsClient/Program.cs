@@ -19,14 +19,14 @@ builder.Services.AddHttpClient("AuthAPI", client =>
 
 // Add auth services
 
+builder.Services.AddScoped<AdminService>();
+
 builder.Services.AddBlazoredLocalStorage();
 
-// register custom auth provider
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 // register auth service
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<MatchService>();
 
 // add authorization capabilites 
 builder.Services.AddAuthorizationCore(config =>
