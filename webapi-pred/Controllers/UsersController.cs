@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace webapi_pred.Controllers
 {
     [ApiController]
-    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
@@ -37,8 +36,9 @@ namespace webapi_pred.Controllers
             return Ok(userDtos);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<UserDto>> CreateUser(User newUser)
+        public async Task<ActionResult<UserDto>> CreateUser([FromBody] User newUser)
         {
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
@@ -54,6 +54,7 @@ namespace webapi_pred.Controllers
                 });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
@@ -69,6 +70,7 @@ namespace webapi_pred.Controllers
             };
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, UserDto userDto)
         {
@@ -84,6 +86,7 @@ namespace webapi_pred.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
